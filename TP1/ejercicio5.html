@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Ejercicio 5</title>
+	</head>
+  <body>
+    <input type="file" id="archivo" />
+      <br/>
+		<canvas id="vistaConFiltro" width="900" height="600" style="border:#000 solid 1px;"></canvas>
+
+    <script
+  			  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  			  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  			  crossorigin="anonymous">
+    </script>
+    <script>
+    var ctx=document.getElementById('vistaConFiltro').getContext("2d");
+    var img = new Image();
+    var imageData;
+    img.onload=function(){
+      ctx.drawImage(img,0,0);
+      imageData=ctx.getImageData(0,0,this.width,this.height);
+      aplicarFiltro(imageData);
+
+    };
+    function dibujar(img){
+      ctx.drawImage(img,0,0);
+    };
+    function aplicarFiltro(imageData){
+      for (var x = 0; x < imageData.width; x++) {
+        for (var y = 0; y < imageData.height; y++) {
+          var red=getRed(imageData,x,y);
+          var green=getGreen(imageData,x,y);
+          var blue=getBlue(imageData,x,y);
+          var tono=parseInt((red+green+blue)/3);
+          var i=((x+y*imageData.width)*4);
+          imageData.data[i+0]=tono;
+          imageData.data[i+1]=tono;
+          imageData.data[i+2]=tono;
+        }
+      }
+      ctx.putImageData(imageData,0,0);
+
+    };
+    function getRed(imageData,x,y){
+      index=((x+y*imageData.width)*4);
+      return imageData.data[index+0];
+    };
+    function getGreen(imageData,x,y){
+      index=((x+y*imageData.width)*4);
+      return imageData.data[index+1];
+    };
+    function getBlue(imageData,x,y){
+      index=((x+y*imageData.width)*4);
+      return imageData.data[index+2];
+    };
+    $(document).ready(function(){
+
+      $("#archivo").on("change",function(ev){
+        ev.preventDefault();
+        var archivos = ev.target.files;
+        var archivo = archivos[0];
+        var reader=new FileReader();
+        reader.onloadend=function(ev){
+          if (ev.target.readyState == FileReader.DONE){
+            img.src=ev.target.result;
+          }
+        };
+        reader.readAsDataURL(archivo);
+
+      });
+    });
+
+
+
+    </script>
+
+</body>
+</html>
