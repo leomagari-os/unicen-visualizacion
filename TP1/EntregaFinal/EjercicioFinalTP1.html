@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+		<link rel="stylesheet" href="css/base.css">
+		<title>Ejercicio Final TP1</title>
+	</head>
+  <div class="site-wrapper">
+		<div class="row">
+			<div class="site-wrapper-inner col-12">
+
+				<div class="row">
+					<div class="col-2 menu">
+						<ul class="nav flex-column nav-masthead">
+						  <li class="nav-item">
+						    <a class="nav-link active" id="subirFoto"href="#">Subir Foto</a>
+						  </li>
+						  <li class="nav-item">
+						    <a class="nav-link disabled"id="filtros" href="#">Filtros</a>
+						  </li>
+						  <li class="nav-item">
+						    <a class="nav-link disabled" id="exportarImagen"href="#">Exportar imagen</a>
+						  </li>
+						</ul>
+					</div>
+					<div class="col-10 cnbox">
+
+			        <h3 class=""><u>Original</u></h3>
+							<canvas id="canvasOriginal" width="400" height="250"style="border:#fff solid 1px;"></canvas>
+
+
+					</div>
+				</div>
+	    </div>
+
+		</div>
+		<div class="col-12 action-box"id="action-box">
+			<h3 class="float-left"><u>Subir Foto</u></h3>
+			<div id="subirFoto">
+			  <input type="file" id="archivo" value="Subir Foto"/>
+			</div>
+		</div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous">
+  </script>
+	<script type="text/javascript"src="js/filtros.js">
+
+	</script>
+<script type="text/javascript" src="js/navegacion.js"></script>
+	</body>
+
+</html>
