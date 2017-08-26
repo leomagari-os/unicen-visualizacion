@@ -4,6 +4,16 @@
       <p>Solo se puede exportar a .png</p>
   </div>
   <div class="col-4">
-      <button type="button" download=""> Exportar</button>
+      <a id="guardar"  class="button-success" download="imagen.png"> Exportar</button>
   </div>
+  <script type="text/javascript">
+  var canvas= document.getElementById('canvasOriginal');
+  $("#guardar").on("click",function(ev){
+
+    var dato = canvas.toDataURL("image/png");
+    $(this).attr('href',dato);
+    console.log(dato);
+
+  });
+  </script>
 </div>

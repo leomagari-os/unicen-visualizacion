@@ -2,3 +2,22 @@
 <div id="subirFoto">
   <input type="file" id="archivo" value="Subir Foto"/>
 </div>
+<script type="text/javascript">
+function leerArchivo(ev){
+  var archivos = ev.target.files;
+  var archivo = archivos[0];
+  var reader=new FileReader();
+  reader.onloadend=function(ev){
+    if (ev.target.readyState == FileReader.DONE){
+      imgOriginal.src=ev.target.result;
+    }
+  };
+  reader.readAsDataURL(archivo);
+};
+  $("#archivo").on("change",function(ev){
+    ev.preventDefault();
+    leerArchivo(ev);
+
+  });
+
+ </script>

@@ -1,11 +1,15 @@
+var canvas;
+var ctx;
+previewFiltro();
 function cargarCanvas() {
-  var canvas=[document.getElementById("filtro1"),
+  canvas=[document.getElementById("filtro1"),
     document.getElementById("filtro2"),
     document.getElementById("filtro3"),
     document.getElementById("filtro4"),
     document.getElementById("filtro5"),
     document.getElementById("filtro6")];
-  var ctx=[canvas[0].getContext("2d"),
+
+  ctx=[canvas[0].getContext("2d"),
     canvas[1].getContext("2d"),
     canvas[2].getContext("2d"),
     canvas[3].getContext("2d"),
@@ -13,28 +17,49 @@ function cargarCanvas() {
     canvas[5].getContext("2d")]
 
 }
-//var canvas = document.getElementById("vistaConFiltro");
-//var ctx=document.getElementById('vistaConFiltro').getContext("2d");
-var imgOriginal = new Image();
+function redimensionarImagen(img){
+    var height=img.height;
+    var width=img.width;
+    while (height>100) {
+      height=height-5;
+      width=width-5;
+    }
+    return dimensions={ancho:width,alto:height};
+
+}
+
+
 var imgRedimensionada=new Image();
 var canvasOriginal= document.getElementById("canvasOriginal");
 var ctxOriginal= document.getElementById('canvasOriginal').getContext("2d");
-imgOriginal.onload=function(){
-  //dibujar(this);
-  var height=imgOriginal.height;
-  var width=imgOriginal.width;
-  canvasOriginal.height=height;
-  canvasOriginal.width=width;
-  ctxOriginal.height=height;
 
-  ctxOriginal.drawImage(this,0,0);
-
-};
 function dibujar(img){
   ctx.drawImage(img,0,0);
 };
+function previewFiltro(){
+  console.log(imgOriginal.src);
+  if(imgOriginal.src===""){
+    alert("no cargaste una imagen.");
+  }else {
+    var dimensions=redimensionarImagen(imgOriginal);
+
+    cargarCanvas();
+    var imd=[];
+    for (var i = 0; i < ctx.length; i++) {
+      imd[i]=ctxOriginal.getImageData(0,0,imgOriginal.width,imgOriginal.height);
+    }
+    console.log(imd);
+    for (var i = 0; i < ctx.length; i++) {
+      aplicarFiltro(imd[i],i);
+      ctx[i].putImageData(imd[i],0,0);
+    }
+
+  }
+
+
+}
 function aplicarFiltro(imageData,indice){
-  if (indice===1) {
+  if (indice===0) {
     for (var x = 0; x < imageData.width; x++) {
       for (var y = 0; y < imageData.height; y++) {
         var red=getRed(imageData,x,y);
@@ -47,9 +72,9 @@ function aplicarFiltro(imageData,indice){
         imageData.data[i+2]=tono;
       }
     }
-    ctx.putImageData(imageData,0,0);
+
   }
-  if(indice===2){
+  if(indice===1){
     for (var x = 0; x < imageData.width; x++) {
       for (var y = 0; y < imageData.height; y++) {
         var red=getRed(imageData,x,y);
@@ -61,42 +86,39 @@ function aplicarFiltro(imageData,indice){
         imageData.data[i+2]=255-blue;
       }
     }
-    ctx.putImageData(imageData,0,0);
+
   }
-  if (indice===3){
+  if (indice===2){
     for (var x = 0; x < imageData.width; x++) {
       for (var y = 0; y < imageData.height; y++) {
         var red=getRed(imageData,x,y);
         var green=getGreen(imageData,x,y);
         var blue=getBlue(imageData,x,y);
-        red=255-red;
-        green=255-green;
-        blue=255-blue;
-        var i=((x+y*imageData.width)*4);
 
+        var i=((x+y*imageData.width)*4);
         imageData.data[i+0]=( red * .393 ) + ( green * .769 ) + ( blue * .189 );
         imageData.data[i+1]= ( red * .349 ) + ( green * .686 ) + ( blue * .168 );
         imageData.data[i+2]=( red * .272 ) + ( green * .534 ) + ( blue * .131 );
       }
     }
-    ctx.putImageData(imageData,0,0);
+
 
   }
-  if (indice===4) {
+  if (indice===3) {
     for (var x = 0; x < imageData.width; x++) {
       for (var y = 0; y < imageData.height; y++) {
         var i=((x+y*imageData.width)*4);
         imageData.data[i+3]=100;
       }
     }
-    ctx.putImageData(imageData,0,0);
+
   }
-  if (indice===5) {
+  if (indice===4) {
 
-    ctx.filter="blur(30px)";
+    ctx[indice].filter="blur(30px)";
 
-  }if (indice===6) {
-    ctx.filter="saturate(20)";
+  }if (indice===5) {
+    ctx[indice].filter="saturate(20)";
   }
 
 
@@ -115,63 +137,49 @@ function getBlue(imageData,x,y){
 };
 $(document).ready(function(){
 
-  $("#archivo").on("change",function(ev){
-    ev.preventDefault();
-    var archivos = ev.target.files;
-    var archivo = archivos[0];
-    var reader=new FileReader();
-    reader.onloadend=function(ev){
-      if (ev.target.readyState == FileReader.DONE){
-        imgOriginal.src=ev.target.result;
-      }
-    };
-    reader.readAsDataURL(archivo);
-  });
   $("#filtro1").on("click",function(ev){
     ev.preventDefault();
-    dibujar(imgOriginal);
-    var imageData=ctx.getImageData(0,0,imgOriginal.width,imgOriginal.height);
-    aplicarFiltro(imageData,1);
+    console.log(canvasOriginal);
+    var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
+    aplicarFiltro(imageData,0);
+    ctxOriginal.putImageData(imageData,0,0);
   });
   $("#filtro2").on("click",function(ev){
     ev.preventDefault();
-    dibujar(imgOriginal);
-    var imageData=ctx.getImageData(0,0,imgOriginal.width,imgOriginal.height);
-    aplicarFiltro(imageData,2);
+    console.log(imgOriginal);
+    var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
+    aplicarFiltro(imageData,1);
+    ctxOriginal.putImageData(imageData,0,0);
   });
   $("#filtro3").on("click",function(ev){
     ev.preventDefault();
-    dibujar(imgOriginal);
-    var imageData=ctx.getImageData(0,0,imgOriginal.width,imgOriginal.height);
-    aplicarFiltro(imageData,3);
+    var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
+    aplicarFiltro(imageData,2);
+    ctxOriginal.putImageData(imageData,0,0);
   });
   $("#filtro4").on("click",function(ev){
     ev.preventDefault();
-    dibujar(imgOriginal);
-
-    var imageData=ctx.getImageData(0,0,imgOriginal.width,imgOriginal.height);
-    aplicarFiltro(imageData,4);
+    var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
+    aplicarFiltro(imageData,3);
+    ctxOriginal.putImageData(imageData,0,0);
   });
   $("#filtro5").on("click",function(ev){
     ev.preventDefault();
-    dibujar(imgOriginal);
-
-    var imageData=ctx.getImageData(0,0,imgOriginal.width,imgOriginal.height);
-    aplicarFiltro(imageData,5);
+    var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
+    aplicarFiltro(imageData,4);
+    ctxOriginal.putImageData(imageData,0,0);
   });
   $("#filtro6").on("click",function(ev){
     ev.preventDefault();
-    dibujar(imgOriginal);
-    var imageData=ctx.getImageData(0,0,imgOriginal.width,imgOriginal.height);
-    aplicarFiltro(imageData,6);
+    var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
+    aplicarFiltro(imageData,5);
+    ctxOriginal.putImageData(imageData,0,0);
   });
-  $("#guardar").on("click",function(ev){
-    ev.preventDefault();
-    var dato = canvas.toDataURL("image/png");
-    dato = dato.replace(/^data:image\/png/,'data:application/octet-stream');
-    document.location.href = dato;
-    console.log(dato);
+  
 
-  });
+
+
+
+
 
 });
