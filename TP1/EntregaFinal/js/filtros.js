@@ -1,194 +1,151 @@
 var canvas;
 var ctx;
 previewFiltro();
-function cargarCanvas() {
-  canvas=[document.getElementById("filtro1"),
-    document.getElementById("filtro2"),
-    document.getElementById("filtro3"),
-    document.getElementById("filtro4"),
-    document.getElementById("filtro5"),
-    document.getElementById("filtro6")];
+function Filtro() {
+  this.canvas=[];
+  this.ctx=[];
+  this.ctxOriginal=document.getElementById("canvasOriginal");
+  this.getRGB=function(imd,x,y){
+      var red,green,blue;
+      index=((x+y*imd.width)*4);
+      red=imd.data[index+0];
+      green=imd.data[index+1];
+      blue=imd.data[index+1];
+      return colors={"red":red,"green":green,"blue":blue};
+  };
 
-  ctx=[canvas[0].getContext("2d"),
-    canvas[1].getContext("2d"),
-    canvas[2].getContext("2d"),
-    canvas[3].getContext("2d"),
-    canvas[4].getContext("2d"),
-    canvas[5].getContext("2d")]
+  this.cargarCanvas=function (img) {
+    //Carga de canvas de thumbnails y sus contextos
+    canvas=[document.getElementById("filtro1"),
+      document.getElementById("filtro2"),
+      document.getElementById("filtro3"),
+      document.getElementById("filtro4"),
+      document.getElementById("filtro5"),
+      document.getElementById("filtro6")];
 
-}
-function redimensionarImagen(img){
-    var height=img.height;
-    var width=img.width;
-    while (height>100) {
-      height=height-5;
-      width=width-5;
+    ctx=[canvas[0].getContext("2d"),
+      canvas[1].getContext("2d"),
+      canvas[2].getContext("2d"),
+      canvas[3].getContext("2d"),
+      canvas[4].getContext("2d"),
+      canvas[5].getContext("2d")];
+    //Redimensionado de la imagen
+    ctx[0].drawImage(img,0,0,150,100);
+
+    var imd=[];
+    for (var i = 0; i < ctx.length; i++) {
+      imd[i]=ctx[0].getImageData(0,0,150,100);
     }
-    return dimensions={ancho:width,alto:height};
+    //aplico los filtros a las thumbnails
+    this.blancoYNegro(ctx[0],imd[0]);
+    this.negativo(ctx[1],imd[1]);
+    this.sepia(ctx[2],imd[2]);
+    this.transparencia(ctx[3],imd[3]);
+    };
+  //FILTROS
+  this.blancoYNegro=function(ctx,imd){
+    for (var x = 0; x < imd.width; x++) {
+      for (var y = 0; y < imd.height; y++) {
+        var colors=this.getRGB(imd,x,y);
+        var tono=parseInt((colors.red+colors.green+colors.blue)/3);
+        var i=((x+y*imd.width)*4);
+        imd.data[i+0]=tono;
+        imd.data[i+1]=tono;
+        imd.data[i+2]=tono;
+      }
+    }
+    ctx.putImageData(imd,0,0);
+  };
+  this.negativo=function(ctx,imd){
+    for (var x = 0; x < imd.width; x++) {
+      for (var y = 0; y < imd.height; y++) {
+        var colors=this.getRGB(imd,x,y);
+        var i=((x+y*imd.width)*4);
+        imd.data[i+0]=255-colors.red;
+        imd.data[i+1]=255-colors.green;
+        imd.data[i+2]=255-colors.blue;
+      }
+    }
+    ctx.putImageData(imd,0,0);
+  };
+  this.sepia=function(ctx,imd){
+    for (var x = 0; x < imd.width; x++) {
+      for (var y = 0; y < imd.height; y++) {
+        var colors=this.getRGB(imd,x,y);
+        var i=((x+y*imd.width)*4);
+        imd.data[i+0]=( colors.red * .393 ) + ( colors.green * .769 ) + ( colors.blue * .189 );
+        imd.data[i+1]= ( colors.red * .349 ) + ( colors.green * .686 ) + ( colors.blue * .168 );
+        imd.data[i+2]=( colors.red * .272 ) + ( colors.green * .534 ) + ( colors.blue * .131 );
+      }
+    }
+    ctx.putImageData(imd,0,0);
+  };
+  this.transparencia=function(ctx,imd){
+    for (var x = 0; x < imd.width; x++) {
+      for (var y = 0; y < imd.height; y++) {
+        var i=((x+y*imd.width)*4);
+        imd.data[i+3]=100;
+      }
+    }
+    ctx.putImageData(imd,0,0);
+  };
 
 }
 
-
-var imgRedimensionada=new Image();
 var canvasOriginal= document.getElementById("canvasOriginal");
 var ctxOriginal= document.getElementById('canvasOriginal').getContext("2d");
 
-function dibujar(img){
-  ctx.drawImage(img,0,0);
-};
-function previewFiltro(){
-  console.log(imgOriginal.src);
-  if(imgOriginal.src===""){
-    alert("no cargaste una imagen.");
-  }else {
-    var dimensions=redimensionarImagen(imgOriginal);
-
-    cargarCanvas();
-    var imd=[];
-    for (var i = 0; i < ctx.length; i++) {
-      imd[i]=ctxOriginal.getImageData(0,0,imgOriginal.width,imgOriginal.height);
-    }
-    console.log(imd);
-    for (var i = 0; i < ctx.length; i++) {
-      aplicarFiltro(imd[i],i);
-      ctx[i].putImageData(imd[i],0,0);
-    }
-
-  }
-
-
+ function previewFiltro(){
+   var herramientaFiltro= new Filtro();
+   herramientaFiltro.cargarCanvas(imgOriginal);
 }
-function aplicarFiltro(imageData,indice){
-  if (indice===0) {
-    for (var x = 0; x < imageData.width; x++) {
-      for (var y = 0; y < imageData.height; y++) {
-        var red=getRed(imageData,x,y);
-        var green=getGreen(imageData,x,y);
-        var blue=getBlue(imageData,x,y);
-        var tono=parseInt((red+green+blue)/3);
-        var i=((x+y*imageData.width)*4);
-        imageData.data[i+0]=tono;
-        imageData.data[i+1]=tono;
-        imageData.data[i+2]=tono;
-      }
-    }
 
-  }
-  if(indice===1){
-    for (var x = 0; x < imageData.width; x++) {
-      for (var y = 0; y < imageData.height; y++) {
-        var red=getRed(imageData,x,y);
-        var green=getGreen(imageData,x,y);
-        var blue=getBlue(imageData,x,y);
-        var i=((x+y*imageData.width)*4);
-        imageData.data[i+0]=255-red;
-        imageData.data[i+1]=255-green;
-        imageData.data[i+2]=255-blue;
-      }
-    }
-
-  }
-  if (indice===2){
-    for (var x = 0; x < imageData.width; x++) {
-      for (var y = 0; y < imageData.height; y++) {
-        var red=getRed(imageData,x,y);
-        var green=getGreen(imageData,x,y);
-        var blue=getBlue(imageData,x,y);
-
-        var i=((x+y*imageData.width)*4);
-        imageData.data[i+0]=( red * .393 ) + ( green * .769 ) + ( blue * .189 );
-        imageData.data[i+1]= ( red * .349 ) + ( green * .686 ) + ( blue * .168 );
-        imageData.data[i+2]=( red * .272 ) + ( green * .534 ) + ( blue * .131 );
-      }
-    }
-
-
-  }
-  if (indice===3) {
-    for (var x = 0; x < imageData.width; x++) {
-      for (var y = 0; y < imageData.height; y++) {
-        var i=((x+y*imageData.width)*4);
-        imageData.data[i+3]=100;
-      }
-    }
-
-  }
-  if (indice===4) {
-	
-    ctx[indice].filter="blur(30px)";
-    
-  }if (indice===5) {
-    ctx[indice].filter="saturate(20)";
-	
-  }
-
-
-};
-function getRed(imageData,x,y){
-  index=((x+y*imageData.width)*4);
-  return imageData.data[index+0];
-};
-function getGreen(imageData,x,y){
-  index=((x+y*imageData.width)*4);
-  return imageData.data[index+1];
-};
-function getBlue(imageData,x,y){
-  index=((x+y*imageData.width)*4);
-  return imageData.data[index+2];
-};
-function resetearFiltro(){
-  ctxOriginal.filter("none");
-}
 $(document).ready(function(){
 
   $("#filtro1").on("click",function(ev){
     ev.preventDefault();
-    console.log(canvasOriginal);
     ctxOriginal.drawImage(imgOriginal,0,0,imgOriginal.width,imgOriginal.height);
-	var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
-    aplicarFiltro(imageData,0);
-    ctxOriginal.putImageData(imageData,0,0);
+	  var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
+    var herramientaFiltro=new Filtro();
+    herramientaFiltro.blancoYNegro(ctxOriginal,imageData);
   });
   $("#filtro2").on("click",function(ev){
     ev.preventDefault();
     ctxOriginal.drawImage(imgOriginal,0,0,imgOriginal.width,imgOriginal.height);
-    
     var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
-    aplicarFiltro(imageData,1);
-    ctxOriginal.putImageData(imageData,0,0);
+    var herramientaFiltro=new Filtro();
+    herramientaFiltro.negativo(ctxOriginal,imageData);
   });
   $("#filtro3").on("click",function(ev){
     ev.preventDefault();
-	ctxOriginal.drawImage(imgOriginal,0,0,imgOriginal.width,imgOriginal.height);
-    
+	  ctxOriginal.drawImage(imgOriginal,0,0,imgOriginal.width,imgOriginal.height);
     var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
-    aplicarFiltro(imageData,2);
-    ctxOriginal.putImageData(imageData,0,0);
+    var herramientaFiltro=new Filtro();
+    herramientaFiltro.sepia(ctxOriginal,imageData);
   });
   $("#filtro4").on("click",function(ev){
     ev.preventDefault();
-	ctxOriginal.drawImage(imgOriginal,0,0,imgOriginal.width,imgOriginal.height);
-    
+	  ctxOriginal.drawImage(imgOriginal,0,0,imgOriginal.width,imgOriginal.height);
     var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
-    aplicarFiltro(imageData,3);
-    ctxOriginal.putImageData(imageData,0,0);
+    var herramientaFiltro=new Filtro();
+    herramientaFiltro.transparencia(ctxOriginal,imageData);
   });
   $("#filtro5").on("click",function(ev){
     ev.preventDefault();
 
     ctxOriginal.drawImage(imgOriginal,0,0,imgOriginal.width,imgOriginal.height);
     var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
-    aplicarFiltro(imageData,4);
+    //aplicarFiltro(imageData,4);
 	ctxOriginal.filter="blur(30px)";
-	
+
 
   });
   $("#filtro6").on("click",function(ev){
     ev.preventDefault();
     var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
-    aplicarFiltro(imageData,5);
+    //aplicarFiltro(imageData,5);
 	ctxOriginal.filter="saturate(20)";
-    
+
   });
 
 

@@ -6,7 +6,7 @@ function cargarContenido(url){
       type:"GET",
       url: "js/templates/"+url,
       success:function (data){
-        console.log(data);
+        
           $("#action-box").html(data);
       }
     });
@@ -49,9 +49,13 @@ $(document).ready(function(){
   });
   $("#filtros").on("click",function(ev) {
     ev.preventDefault();
+    if(imgOriginal.src===""){
+         alert("no cargaste una imagen.");
+    }else {
     clearActive();
     $("#filtros").addClass("active");
     cargarContenido("filtros.html");
+    }
   });
   $("#exportarImagen").on("click",function(ev) {
     ev.preventDefault();
