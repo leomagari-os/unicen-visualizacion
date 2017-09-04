@@ -6,7 +6,7 @@ function cargarContenido(url){
       type:"GET",
       url: "js/templates/"+url,
       success:function (data){
-        
+
           $("#action-box").html(data);
       }
     });
@@ -59,9 +59,13 @@ $(document).ready(function(){
   });
   $("#exportarImagen").on("click",function(ev) {
     ev.preventDefault();
+    if(imgOriginal.src===""){
+         alert("no cargaste una imagen.");
+    }else {
     clearActive();
     $("#exportarImagen").addClass("active");
     cargarContenido("exportar.html");
+    }
   });
   $("#archivo").on("change",function(ev){
     ev.preventDefault();
@@ -70,11 +74,11 @@ $(document).ready(function(){
   });
   $("#guardar").on("click",function(ev){
     ev.preventDefault();
-    alert("hola");
+
     var dato = canvas.toDataURL("image/png");
     dato = dato.replace(/^data:image\/png/,'data:application/octet-stream');
     document.location.href = dato;
-    console.log(dato);
+
 
   });
 

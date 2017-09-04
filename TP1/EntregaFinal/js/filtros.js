@@ -1,7 +1,22 @@
 var canvas;
 var ctx;
 previewFiltro();
+var matrices={
+  "blur":[[1,2,1],
+          [2,4,2],
+          [1,2,1]],
+  "deteccionDeBordes":[[0,1,0],
+                      [1,-4,1],
+                      [0,1,0]]
+}
 function Filtro() {
+  //matrices de convolucion para los filtros que la necesitan
+  this.matrizBlur=[[1,2,1],
+          [2,4,2],
+          [1,2,1]];
+  this.matrizDeteccionDeBordes=[[0,1,0],
+                                [1,-4,1],
+                                [0,1,0]];
   this.canvas=[];
   this.ctx=[];
   this.ctxOriginal=document.getElementById("canvasOriginal");
@@ -12,6 +27,50 @@ function Filtro() {
       green=imd.data[index+1];
       blue=imd.data[index+1];
       return colors={"red":red,"green":green,"blue":blue};
+  };
+  //para los filtros en los que hace falta utilizar matrices de convolucion
+  this.convolucion= function(matriz,offset,ctx,imd) {
+    var m = [].concat(matriz[0], matriz[1], matriz[2]); //convierte la matriz en un arreglo de una dimension
+    var divisor = m.reduce(function(a, b) {
+      return a + b;
+    }) || 1; // sum
+    var imdOriginalData=imd.data;
+    var imdNuevo=ctx.createImageData(imd);
+    var imdNuevoData= imdNuevo.data;
+    var length= imdNuevoData.length;
+    var res = 0;
+
+    for (var i = 0; i < length; i++) {
+
+      if ((i + 1) % 4 === 0) {
+        imdNuevoData[i] = imdOriginalData[i];
+        continue;//cada vez que llega al canal alpha saltea un ciclo
+      }
+      res = 0;
+      var matImagen = [//matriz imagen
+        imdOriginalData[i-imd.width*4-4] || imdOriginalData[i],
+        imdOriginalData[i-imd.width*4] || imdOriginalData[i],
+        imdOriginalData[i-imd.width*4+4] || imdOriginalData[i],
+        imdOriginalData[i-4] || imdOriginalData[i],
+        imdOriginalData[i],
+        imdOriginalData[i+4] || imdOriginalData[i],
+        imdOriginalData[i+imd.width*4-4] || imdOriginalData[i],
+        imdOriginalData[i+imd.width*4] || imdOriginalData[i],
+        imdOriginalData[i+imd.width*4+4] || imdOriginalData[i]
+      ];
+      for (var j = 0; j < 9; j++) {
+        res+=matImagen[j]*m[j];//matriz de convolucion mult matriz imagen
+      }
+      res/=divisor;
+      if(offset) {
+        res+=offset;
+      }
+
+      imdNuevoData[i] = res;//reemplaza al pixel por el resultado de la ecuacion
+
+    }
+
+    ctx.putImageData(imdNuevo, 0, 0);
   };
 
   this.cargarCanvas=function (img) {
@@ -37,10 +96,14 @@ function Filtro() {
       imd[i]=ctx[0].getImageData(0,0,150,100);
     }
     //aplico los filtros a las thumbnails
+
     this.blancoYNegro(ctx[0],imd[0]);
     this.negativo(ctx[1],imd[1]);
     this.sepia(ctx[2],imd[2]);
     this.transparencia(ctx[3],imd[3]);
+
+    this.blur(this.matrizBlur,ctx[4],imd[4]);
+    this.deteccionDeBordes(this.matrizDeteccionDeBordes,ctx[5],imd[5]);
     };
   //FILTROS
   this.blancoYNegro=function(ctx,imd){
@@ -89,6 +152,14 @@ function Filtro() {
     }
     ctx.putImageData(imd,0,0);
   };
+  this.blur=function(matriz,ctx,imd){
+
+    this.convolucion(matriz,0,ctx,imd);
+
+  };
+  this.deteccionDeBordes=function(matriz,ctx,imd){
+    this.convolucion(matriz,0,ctx,imd);
+  }
 
 }
 
@@ -135,16 +206,17 @@ $(document).ready(function(){
 
     ctxOriginal.drawImage(imgOriginal,0,0,imgOriginal.width,imgOriginal.height);
     var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
-    //aplicarFiltro(imageData,4);
-	ctxOriginal.filter="blur(30px)";
+    var herramientaFiltro= new Filtro();
+    herramientaFiltro.blur(matrices.blur,ctxOriginal,imageData);
+
 
 
   });
   $("#filtro6").on("click",function(ev){
     ev.preventDefault();
     var imageData=ctxOriginal.getImageData(0,0,canvasOriginal.width,canvasOriginal.height);
-    //aplicarFiltro(imageData,5);
-	ctxOriginal.filter="saturate(20)";
+    var herramientaFiltro= new Filtro();
+    herramientaFiltro.deteccionDeBordes(matrices.deteccionDeBordes,ctxOriginal,imageData);
 
   });
 
