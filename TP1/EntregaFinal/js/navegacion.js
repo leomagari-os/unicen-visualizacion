@@ -16,6 +16,11 @@ var imgOriginal = new Image();
 
   var canvasOriginal= document.getElementById("canvasOriginal");
   var ctxOriginal= canvasOriginal.getContext("2d");
+  ctxOriginal.fillStyle = "#333";
+  ctxOriginal.fillRect(0, 0, canvasOriginal.width,canvasOriginal.height);
+  ctxOriginal.fillStyle='white';
+  ctxOriginal.font = '15px Arial';
+  ctxOriginal.fillText('Inserte una imagen para comenzar',((canvasOriginal.width/4)), (canvasOriginal.height/2));
   imgOriginal.onload=function(){
     var height=imgOriginal.height;
     var width=imgOriginal.width;
